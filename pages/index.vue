@@ -208,8 +208,12 @@ export default {
       }
     },
     openFile({ message }) {
-      console.log(message.file)
-			window.open(message.file.url, '_blank')
+      //console.log(message.file)
+			//window.open(message.file.url, '_blank')
+      var image = new Image();
+        image.src =message.file.url;
+        var w = window.open("",'_blank');
+        w.document.write(image.outerHTML);
 		},
     connect_to_peer(){
       if(this.connect_id){
