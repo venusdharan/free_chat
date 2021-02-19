@@ -509,7 +509,7 @@ export default {
                 // Store a global reference of the other user stream
                 window.peer_stream = stream;
                 // Display the stream of the other user in the peer-camera video element !
-                onReceiveStream(stream, 'peer-camera');
+                self.onReceiveStream(stream, 'peer-camera');
             });
 
             // Handle when the call finishes
