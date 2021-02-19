@@ -58,7 +58,7 @@
 
 <script>
   import ChatWindow from 'vue-advanced-chat';
-  import 'vue-advanced-chat/dist/vue-advanced-chat.css';
+  //import 'vue-advanced-chat/dist/vue-advanced-chat.css';
   import Peer from 'peerjs';
 
 export default {
