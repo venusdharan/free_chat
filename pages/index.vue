@@ -49,7 +49,34 @@
         </chat-window>
       </v-tab-item>
       <v-tab-item>
-
+        <v-row>
+          <v-col>
+<vue-web-cam
+                        ref="webcam"
+                        :device-id="deviceId"
+                        width="100%"
+                        @started="onStarted"
+                        @stopped="onStopped"
+                        @error="onError"
+                        @cameras="onCameras"
+                        @camera-change="onCameraChange"
+                    />
+                    <select v-model="camera">
+                            <option>-- Select Device --</option>
+                            <option
+                                v-for="device in devices"
+                                :key="device.deviceId"
+                                :value="device.deviceId"
+                            >{{ device.label }}</option>
+                        </select>
+                         <button type="button" class="btn btn-primary" @click="onCapture">Capture Photo</button>
+                        <button type="button" class="btn btn-danger" @click="onStop">Stop Camera</button>
+                        <button type="button" class="btn btn-success" @click="onStart">Start Camera</button>
+          </v-col>
+          <v-col>
+            
+          </v-col>
+        </v-row>
       </v-tab-item>
     </v-tabs-items>
     </v-col>
@@ -60,14 +87,22 @@
   import ChatWindow from 'vue-advanced-chat';
   //import 'vue-advanced-chat/dist/vue-advanced-chat.css';
   import Peer from 'peerjs';
+  import {WebCam} from 'vue-web-cam'
 
 export default {
   components: {
-    ChatWindow
+    ChatWindow,
+    'vue-web-cam': WebCam
   },
   data(){
     return{
       tab: null,
+
+      img: null,
+            camera: null,
+            deviceId: null,
+            devices: [],
+
       roomsPerPage: 15,
 			rooms: [
                     {
