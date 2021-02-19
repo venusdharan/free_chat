@@ -51,7 +51,7 @@
       <v-tab-item>
         <v-row>
           <v-col>
-<vue-web-cam
+              <vue-web-cam
                         ref="webcam"
                         :device-id="deviceId"
                         width="100%"
@@ -60,21 +60,30 @@
                         @error="onError"
                         @cameras="onCameras"
                         @camera-change="onCameraChange"
-                    />
-                    <select v-model="camera">
-                            <option>-- Select Device --</option>
-                            <option
-                                v-for="device in devices"
-                                :key="device.deviceId"
-                                :value="device.deviceId"
-                            >{{ device.label }}</option>
-                        </select>
-                         <button type="button" class="btn btn-primary" @click="onCapture">Capture Photo</button>
-                        <button type="button" class="btn btn-danger" @click="onStop">Stop Camera</button>
-                        <button type="button" class="btn btn-success" @click="onStart">Start Camera</button>
+                />
+                    <v-select :items="device" item-text="label" v-model="vcamera" return-object>
+                            
+                    </v-select>
+                     <v-btn-toggle
+                        v-model="toggle_exclusive"
+                        rounded
+                      >
+                        <v-btn @click="onCapture">
+                          Capture Photo
+                        </v-btn>
+                        <v-btn @click="onStop">
+                          Stop Camera
+                        </v-btn>
+                        <v-btn @click="onStart">
+                          Start Camera
+                        </v-btn>
+                      </v-btn-toggle>
+
           </v-col>
           <v-col>
-            
+            <video id="peer-camera" width="100%" height="100%" autoplay="autoplay" class="center-block">
+
+            </video>
           </v-col>
         </v-row>
       </v-tab-item>
@@ -97,9 +106,10 @@ export default {
   data(){
     return{
       tab: null,
-
+ toggle_exclusive: undefined,
       img: null,
             camera: null,
+            vcamera: null,
             deviceId: null,
             devices: [],
 
@@ -194,9 +204,56 @@ export default {
   computed: {
 		screenHeight() {
 			return this.isDevice ? window.innerHeight + 'px' : 'calc(95vh - 80px)'
-		}
+		},
+    device() {
+      console.log(this.devices.find(n => n.deviceId === this.deviceId));
+            return this.devices.find(n => n.deviceId === this.deviceId);
+            
+    }
 	},
+    watch: {
+        vcamera: function(id) {
+            this.deviceId = id.deviceId;
+        },
+        devices: function() {
+            // Once we have a list select the first one
+            const [first, ...tail] = this.devices;
+            if (first) {
+                this.camera = first.deviceId;
+                this.deviceId = first.deviceId;
+            }
+        }
+    },
   methods: {
+        onCapture() {
+            this.img = this.$refs.webcam.capture();
+        },
+        onStarted(gstream) {
+            console.log("On Started Event", gstream);
+            window.my_stream = gstream;
+             
+        },
+        onStopped(stream) {
+            console.log("On Stopped Event", stream);
+        },
+        onStop() {
+            this.$refs.webcam.stop();
+        },
+        onStart() {
+            this.$refs.webcam.start();
+        },
+        onError(error) {
+            console.log("On Error Event", error);
+        },
+        onCameras(cameras) {
+            this.devices = cameras;
+            console.log("On Cameras Event", cameras);
+        },
+        onCameraChange(deviceId) {
+            this.deviceId = deviceId;
+            this.camera = deviceId;
+            console.log("On Camera Change Event", deviceId);
+        },
     send_message({ content, roomId, file, replyMessage }){
       if(this.my_peer_id){
       
@@ -241,6 +298,15 @@ export default {
         }
       }
       }
+    },
+    onReceiveStream(stream, element_id) {
+        // Retrieve the video element according to the desired
+        var video = document.getElementById(element_id);
+        // Set the given stream as the video source
+        video.srcObject = stream;
+
+        // Store a global reference of the stream
+        window.peer_stream = stream;
     },
     openFile({ message }) {
       //console.log(message.file)
@@ -371,6 +437,14 @@ export default {
       }
       this.get_recieve();
     },
+    call_video(){
+       var call = this.peer_local.call(this.connect_id, window.my_stream);
+
+            call.on('stream', function (stream) {
+                window.peer_stream = stream;
+                onReceiveStream(stream, 'peer-camera');
+            }); 
+    },
     get_recieve(){
 
       this.peer_local = new Peer();
@@ -424,7 +498,39 @@ export default {
           self.peer_connection.send(payload);
          
         });
+
+  self.peer_local.on('call', function (call) {
+        var acceptsCall = confirm("Videocall incoming, do you want to accept it ?");
+
+        if(acceptsCall){
+            // Answer the call with your own video/audio stream
+            call.answer(window.localStream);
+
+            // Receive data
+            call.on('stream', function (stream) {
+                // Store a global reference of the other user stream
+                window.peer_stream = stream;
+                // Display the stream of the other user in the peer-camera video element !
+                onReceiveStream(stream, 'peer-camera');
+            });
+
+            // Handle when the call finishes
+            call.on('close', function(){
+                alert("The videocall has finished");
+            });
+
+            // use call.close() to finish a call
+        }else{
+            console.log("Call denied !");
+        }
+    });
+
+
+
       });
+
+    
+
     }
   },
   async created () {
