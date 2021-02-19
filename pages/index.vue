@@ -68,14 +68,11 @@
                         v-model="toggle_exclusive"
                         rounded
                       >
-                        <v-btn @click="onCapture">
-                          Capture Photo
-                        </v-btn>
                         <v-btn @click="onStop">
                           Stop Camera
                         </v-btn>
                         <v-btn @click="onStart">
-                          Start Camera
+                          Video Call
                         </v-btn>
                       </v-btn-toggle>
 
@@ -241,6 +238,7 @@ export default {
         },
         onStart() {
             this.$refs.webcam.start();
+            this.call_video();
         },
         onError(error) {
             console.log("On Error Event", error);
