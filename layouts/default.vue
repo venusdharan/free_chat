@@ -2,11 +2,17 @@
   <v-app dark>
     <v-navigation-drawer
       v-model="drawer"
-      :mini-variant="miniVariant"
-      :clipped="clipped"
-      fixed
+style="width:25%;"
+     temporary
       app
     >
+    <v-card>
+      <v-img
+      src="https://cdn.vuetifyjs.com/images/cards/sunshine.jpg"
+      height="200px"
+    ></v-img>
+      <v-card-title>Free Chat</v-card-title>
+    </v-card>
       <v-list>
         <v-list-item
           v-for="(item, i) in items"

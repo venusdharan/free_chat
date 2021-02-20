@@ -14,7 +14,8 @@
       label="ALERT Sound "
       ></v-switch>
     </v-col>
-    <v-col cols="10">
+    <v-col cols="10" >
+      <div v-if="my_peer_id">
       <v-tabs
       v-model="tab" >
       <v-tab>
@@ -85,6 +86,7 @@
         </v-row>
       </v-tab-item>
     </v-tabs-items>
+    </div>
     </v-col>
   </v-row>
 </template>
@@ -253,6 +255,7 @@ export default {
             console.log("On Camera Change Event", deviceId);
         },
     send_message({ content, roomId, file, replyMessage }){
+      console.log(content)
       if(this.my_peer_id){
       
       if(this.peer_connection){
